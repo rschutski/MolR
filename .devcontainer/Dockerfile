@@ -16,6 +16,7 @@ RUN apt-get update && apt-get upgrade -y --no-install-recommends \
     git \
     lshw \
     build-essential \
+    python3.11-dev \
     python3.11-venv \
     cmake \
     vim \
