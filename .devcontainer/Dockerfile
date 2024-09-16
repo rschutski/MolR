@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=nvidia/cuda:12.3.2-cudnn9-devel-ubuntu22.04
+ARG BASE_IMAGE=nvidia/cuda:12.4.1-cudnn-devel-ubuntu22.04
 FROM ${BASE_IMAGE}
 
 # Sagemaker settings for notebook
@@ -52,7 +52,7 @@ WORKDIR /opt/code
 COPY pyproject.toml .
 ADD src src
 
-RUN poetry install --without dev --no-root && rm -rf $POETRY_CACHE_DIR
+RUN poetry install --only dev --no-root && rm -rf $POETRY_CACHE_DIR
 # Allow changes in /opt/venv for all, as devcontainers map the original user to the system user
 RUN sudo chmod -R a+rwx /opt/venv
 
