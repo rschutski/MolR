@@ -1,4 +1,4 @@
-ARG BASE_IMAGE=nvidia/cuda:12.3.2-cudnn9-runtime-ubuntu22.04
+ARG BASE_IMAGE=nvidia/cuda:12.3.2-cudnn9-devel-ubuntu22.04
 FROM ${BASE_IMAGE}
 
 # Sagemaker settings for notebook
@@ -17,6 +17,8 @@ RUN apt-get update && apt-get upgrade -y --no-install-recommends \
     lshw \
     build-essential \
     python3.11-venv \
+    cmake \
+    vim \
     && rm -rf /var/lib/apt/lists/*
 
 # awscli for external ssh access to Notebook space
