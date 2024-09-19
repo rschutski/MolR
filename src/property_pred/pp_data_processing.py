@@ -1,8 +1,10 @@
 import os
-import dgl
-import torch
 import pickle
+
+import dgl
 import pysmiles
+import torch
+
 from data_processing import networkx_to_dgl
 
 
@@ -26,7 +28,7 @@ class PropertyPredDataset(dgl.data.DGLDataset):
     def load(self):
         print('loading ' + self.args.dataset + ' dataset from ' + self.path + '.bin')
         self.graphs, self.labels = dgl.load_graphs(self.path + '.bin')
-        self.labels = self.labels['label']
+        self.labels = self.labels['label'].numpy().tolist()
         self.to_gpu()
 
     def process(self):

@@ -1,0 +1,9 @@
+{
+    "recommendations": [
+        "tamasfe.even-better-toml",
+        "doi.fileheadercomment",
+        "ms-toolsai.jupyter",
+        "ms-python.vscode-pylance",
+        "esbenp.prettier-vscode"
+    ]
+}
