@@ -4,7 +4,7 @@ import torch
 import pickle
 import pysmiles
 from collections import defaultdict
-
+import networkx as nx
 
 attribute_names = ['element', 'charge', 'aromatic', 'hcount']
 
@@ -63,6 +63,10 @@ class SmilesDataset(dgl.data.DGLDataset):
 
 
 def networkx_to_dgl(raw_graph, feature_encoder):
+    # if the graph does not start from 0, re-index the nodes
+    if sorted(raw_graph)[0] != 0:
+        raw_graph = nx.convert_node_labels_to_integers(
+            raw_graph, first_label=0, ordering='default', label_attribute=None)
     # add edges
     src = [s for (s, _) in raw_graph.edges]
     dst = [t for (_, t) in raw_graph.edges]
@@ -72,6 +76,36 @@ def networkx_to_dgl(raw_graph, feature_encoder):
     for i in range(len(raw_graph.nodes)):
         raw_feature = raw_graph.nodes[i]
         numerical_feature = []
+        for j in attribute_names:
+            if raw_feature[j] in feature_encoder[j]:
+                numerical_feature.append(feature_encoder[j][raw_feature[j]])
+            else:
+                numerical_feature.append(feature_encoder[j]['unknown'])
+        node_features.append(numerical_feature)
+    node_features = torch.tensor(node_features)
+    graph.ndata['feature'] = node_features
+    # transform to bi-directed graph with self-loops
+    graph = dgl.to_bidirected(graph, copy_ndata=True)
+    graph = dgl.add_self_loop(graph)
+    return graph
+
+
+def mol_to_dgl(mol, feature_encoder):
+    # add edges
+    src = []
+    dst = []
+    for bond in mol.GetBonds():
+        src.append(bond.GetBeginAtomIdx())
+        dst.append(bond.GetEndAtomIdx())
+    graph = dgl.graph((src, dst), num_nodes=mol.GetNumAtoms())
+    # add node features
+    node_features = []
+    for atom in mol.GetAtoms():
+        numerical_feature = []
+        raw_feature = {'element': atom.GetSymbol(),
+                       'charge': atom.GetFormalCharge(),
+                       'aromatic': atom.GetIsAromatic(),
+                       'hcount': atom.GetTotalNumHs()}
         for j in attribute_names:
             if raw_feature[j] in feature_encoder[j]:
                 numerical_feature.append(feature_encoder[j][raw_feature[j]])
