@@ -23,7 +23,7 @@ pysmiles = "*"
 networkx = "*"
 scipy = "*"
 cython = "^3.0.11"
-pymilvus = "^2.4.6"
+pymilvus = {extras = ["bulk-writer"], version = "^2.4.6"}
 easydict = "^1.13"
 datasets = "^3.0.0"
 rdkit = "^2024.3.5"

@@ -18,3 +18,8 @@ __pycache__/
 # test files
 demo.db
 demo.db.lock
+
+# scratch files for development
+graphs_cache.bin
+milvus_demo.db
+.milvus_demo.db.lock
