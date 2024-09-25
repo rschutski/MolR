@@ -23,10 +23,11 @@ pysmiles = "*"
 networkx = "*"
 scipy = "*"
 cython = "^3.0.11"
-pymilvus = {extras = ["bulk-writer"], version = "^2.4.6"}
+pymilvus = {extras = ["bulk-writer", "model"], version = "^2.4.6"}
 easydict = "^1.13"
 datasets = "^3.0.0"
 rdkit = "^2024.3.5"
+lancedb = "^0.13.0"
 
 [tool.poetry.group.sage.dependencies]
 sagemaker-inference = "*"
