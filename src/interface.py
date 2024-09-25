@@ -26,6 +26,7 @@ class MolRSmilesEmbedder:
         self.embedder = GNN(
             self.hparams['gnn'], self.hparams['layer'],
             self.hparams['feature_len'], self.hparams['dim'])
+        self.dim = self.hparams['dim']
         if torch.cuda.is_available():
             self.embedder.load_state_dict(
                 torch.load(
@@ -46,13 +47,24 @@ class MolRSmilesEmbedder:
         device = next(self.embedder.parameters()).device
         graphs = [self.smiles_to_dgl_rdkit(
             smiles, feature_encoder=self.feature_encoder) for smiles in batch['smiles']]
-        graphs_gpu = [graph.to(device) for graph in graphs]
+        valid_indices = [i for i, graph in enumerate(graphs) if graph is not None]
+        graphs_gpu = [graph.to(device) for graph in graphs if graph is not None]
         with torch.no_grad():
-             batch['vector'] = self.embedder(dgl.batch(graphs_gpu))
+            vectors = self.embedder(dgl.batch(graphs_gpu))
+            if len(valid_indices) < len(graphs):
+                vectors_full = torch.zeros((len(graphs), self.dim), device=device)
+                vectors_full[valid_indices] = vectors
+                batch['vector'] = vectors_full
+            else:
+                batch['vector'] = vectors
         return batch
 
     @staticmethod
-    def smiles_to_dgl_rdkit(smiles: str, feature_encoder: dict[str, Any]) -> dgl.DGLGraph:
-        mol = Chem.RemoveHs(Chem.MolFromSmiles(smiles))
-        graph = mol_to_dgl(mol, feature_encoder)
+    def smiles_to_dgl_rdkit(smiles: str, feature_encoder: dict[str, Any]) -> dgl.DGLGraph | None:
+        try:
+            mol = Chem.RemoveHs(Chem.MolFromSmiles(smiles))
+            graph = mol_to_dgl(mol, feature_encoder)
+        except Exception as e:
+            graph = None
+            print(f'Error in smiles_to_dgl_rdkit: {e}')
         return graph
