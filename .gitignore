@@ -6,3 +6,20 @@
 /data/HIV/HIV.bin
 /commands.txt
 /baseline
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# temporary python files
+.ipynb_checkpoints
+*.pyc
+
+# test files
+demo.db
+demo.db.lock
+
+# scratch files for development
+graphs_cache.bin
+milvus_demo.db
+.milvus_demo.db.lock

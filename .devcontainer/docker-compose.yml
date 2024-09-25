@@ -1,0 +1,13 @@
+services:
+  toolkit:
+    build:
+      context: ..
+      dockerfile: .devcontainer/Dockerfile
+    volumes:
+      - ../..:/home/sagemaker-user:cached
+      - /mnt/efs/sagem-mlchem/r.schutski:/opt/code
+    # Overrides default command so things don't shut down after the process ends.
+    entrypoint: sleep infinity
+    # command: sleep infinity
+volumes:
+    bashhistory:

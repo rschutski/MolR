@@ -1,0 +1,73 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/postgres
+{
+	"name": "${localEnv:USER}_embeddings",
+
+	"dockerComposeFile": "docker-compose.yml",
+	"service": "toolkit",
+	"workspaceFolder": "/home/sagemaker-user/${localWorkspaceFolderBasename}",
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {
+	// },
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	// This can be used to network with other containers or the host.
+	// "forwardPorts": [5000, 5432],
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "poetry install --no-root",
+
+	// Configure tool-specific properties.
+	"customizations": {
+		// Configure properties specific to VS Code.
+		"vscode": {
+			// Set *default* container specific settings.json values on container create.
+			"settings": {
+				"git.openRepositoryInParentFolders": "always",
+				"[python]": {
+					"editor.formatOnSave": true,
+					"editor.codeActionsOnSave": {
+						"source.fixAll": true,
+						"source.organizeImports": true
+					},
+					"editor.formatOnType": true,
+					"editor.defaultFormatter": "charliermarsh.ruff"
+				},
+				"mypy-type-checker.importStrategy": "fromEnvironment",
+				"python.terminal.activateEnvInCurrentTerminal": true,
+				"python.testing.pytestEnabled": true,
+				"python.testing.unittestEnabled": false,
+				"editor.rulers": [100, 120],
+				"autoDocstring.customTemplatePath": ".devcontainer/doc.mustache",
+				"gitPrefix.pattern": "(mlp|dar|autot|ch|tid)(-|_)(\\d+)(?!\\d).*",
+				"gitPrefix.patternIgnoreCase": true,
+				"gitPrefix.replacement": "p1.toUpperCase() + p2 + p3 + ': '",
+				"gitPrefix.replacementIsFunction": true,
+				"fileHeaderComment.template": {
+					"*":["# Copyright (c) ${year} Insilico Medicine"]
+				},
+			},
+			"extensions": [
+				"ms-python.python",
+				"streetsidesoftware.code-spell-checker",
+				"njpwerner.autodocstring",
+				"ryanluker.vscode-coverage-gutters",
+				"ms-python.vscode-pylance",
+				"gitlab.gitlab-workflow",
+				"doi.fileheadercomment",
+				"ms-python.mypy-type-checker",
+				"charliermarsh.ruff",
+				"davidanson.vscode-markdownlint",
+				"bierner.markdown-mermaid",
+				"srmeyers.git-prefix",
+				"ms-toolsai.jupyter",
+				"tamasfe.even-better-toml"
+			]
+		}
+	}
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	// "remoteUser": "root"
+}
+
