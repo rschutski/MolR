@@ -34,7 +34,8 @@ RUN useradd --create-home --shell /bin/bash --gid "${NB_GID}" --uid ${NB_UID} -G
 RUN mkdir /opt/venv && chown -R ${NB_USER}:${NB_GID} /opt/venv
 
 # Prepare virtual env so poetry will install everything there
-ENV PATH="/opt/venv/bin:${PATH}" VIRTUAL_ENV=/opt/venv
+ENV PATH="/opt/venv/bin:${PATH}" 
+ENV VIRTUAL_ENV=/opt/venv
 RUN python3.11 -m venv ${VIRTUAL_ENV}
 
 # Poetry

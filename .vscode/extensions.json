@@ -4,6 +4,7 @@
         "doi.fileheadercomment",
         "ms-toolsai.jupyter",
         "ms-python.vscode-pylance",
-        "esbenp.prettier-vscode"
+        "esbenp.prettier-vscode",
+        "github.copilot"
     ]
 }
