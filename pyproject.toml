@@ -28,6 +28,7 @@ easydict = "^1.13"
 datasets = "^3.0.0"
 rdkit = "^2024.3.5"
 lancedb = "^0.13.0"
+tantivy = "0.20.1"
 
 [tool.poetry.group.sage.dependencies]
 sagemaker-inference = "*"
