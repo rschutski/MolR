@@ -6,7 +6,12 @@ authors = ["Hongwei Wang et al."]
 packages = [
     { include = "src" }
 ]
-include = ["saved/*"]
+# include = ["saved/*"]
+
+[[tool.poetry.source]]
+name = "pytorch-gpu"
+url = "https://download.pytorch.org/whl/cu118"
+priority = "explicit"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
@@ -14,15 +19,19 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
-torch = "*"
+torch = "2.2.2"
 matplotlib = "*"
 scikit-learn = "*"
 pysmiles = "*"
-networkx = "*"
+networkx = "2.*,<2.8"
 scipy = "*"
 cython = "^3.0.11"
-datasets = "^3.0.0"
-rdkit = "*"
+datasets = "<3.0.0" # for compatibility with molpredictors
+rdkit-pypi = "*"
+dgl = [
+    {path = "thirdparty/dgl/dist/dgl-2.5-cp39-cp39-linux_x86_64.whl", python = "3.9"},
+    {version = "*", python = ">3.9"},    
+]
 
 [tool.poetry.group.sage.dependencies]
 sagemaker-inference = "*"
@@ -37,7 +46,7 @@ ruff = "^0.1.3"
 src = ["src", "tests", "notebooks"]
 extend-exclude = ["__pycache__"]
 line-length = 100
-target-version = "py311"
+target-version = "py39"
 select = [
     "E",  # pycodestyle errors
     "W",  # pycodestyle warnings
@@ -71,7 +80,7 @@ quote-style = "single"
 indent-style = "space"
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.9"
 exclude = "(tests)"
 plugins = [
   "pydantic.mypy",
