@@ -13,7 +13,6 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
-poetry = "^1.8.2"
 python = ">=3.9,<4.0"
 torch = "*"
 matplotlib = "*"
@@ -21,7 +20,8 @@ scikit-learn = "*"
 pysmiles = "*"
 networkx = "*"
 scipy = "*"
-datasets = "*"
+cython = "^3.0.11"
+datasets = "^3.0.0"
 rdkit = "*"
 
 [tool.poetry.group.sage.dependencies]
