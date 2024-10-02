@@ -23,10 +23,12 @@ torch = "2.2.2"
 matplotlib = "*"
 scikit-learn = "*"
 pysmiles = "*"
-networkx = "2.*,<2.8"
+networkx = "2.*,<2.9"
 scipy = "*"
 cython = "^3.0.11"
 datasets = "<3.0.0" # for compatibility with molpredictors
+pyarrow = "14.*"  # for compatibility with darwin_molecules
+dill = "0.3.6" # for compatibility with darwin_molecules
 rdkit-pypi = "*"
 #dgl = [
 #    {path = "thirdparty/dgl/dist/dgl-2.5-cp39-cp39-linux_x86_64.whl", python = "3.9"},
