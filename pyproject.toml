@@ -28,10 +28,10 @@ scipy = "*"
 cython = "^3.0.11"
 datasets = "<3.0.0" # for compatibility with molpredictors
 rdkit-pypi = "*"
-dgl = [
-    {path = "thirdparty/dgl/dist/dgl-2.5-cp39-cp39-linux_x86_64.whl", python = "3.9"},
-    {version = "*", python = ">3.9"},    
-]
+#dgl = [
+#    {path = "thirdparty/dgl/dist/dgl-2.5-cp39-cp39-linux_x86_64.whl", python = "3.9"},
+#    {version = "*", python = ">3.9"},    
+#]
 
 [tool.poetry.group.sage.dependencies]
 sagemaker-inference = "*"
