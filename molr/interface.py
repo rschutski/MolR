@@ -22,9 +22,9 @@ class MolRSmilesEmbedder:
     ):
         self.model_path = Path(model_path)
         self.device = device or torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-        self.load_model(self.model_path, self.device)
+        self._load_model(self.model_path, self.device)
 
-    def load_model(self, model_path: Union[str, Path], device: torch.device) -> None:
+    def _load_model(self, model_path: Union[str, Path], device: torch.device) -> None:
         self.feature_encoder = pickle.load(model_path.joinpath('feature_enc.pkl').open('rb'))
         self.hparams = pickle.load(model_path.joinpath('hparams.pkl').open('rb'))
         self.embedder = GNN(
@@ -45,6 +45,9 @@ class MolRSmilesEmbedder:
                     map_location=torch.device('cpu'), weights_only=True))
         self.embedder.eval()
 
+    @property
+    def dimension(self) -> int:
+        return self.dim
 
     def __call__(
         self,
@@ -61,7 +64,7 @@ class MolRSmilesEmbedder:
     ) -> dict[str, Any]:
         """Transforms SMILES into an embedding"""
         device = next(self.embedder.parameters()).device
-        graphs = self.smiles_batch_to_dgl(batch, feature_encoder=self.feature_encoder)
+        graphs = self._smiles_batch_to_dgl(batch, feature_encoder=self.feature_encoder)
         valid_indices = [i for i, graph in enumerate(graphs) if graph is not None]
         graphs_gpu = [graph.to(device) for graph in graphs if graph is not None]
         with torch.no_grad():
@@ -75,7 +78,7 @@ class MolRSmilesEmbedder:
         return batch
 
     @staticmethod
-    def smiles_to_dgl(
+    def _smiles_to_dgl(
         smiles: str, feature_encoder: dict[str, Any]
     ) -> Union[dgl.DGLGraph, None]:
         try:
@@ -87,18 +90,18 @@ class MolRSmilesEmbedder:
         return graph
 
     @staticmethod
-    def smiles_batch_to_dgl(
+    def _smiles_batch_to_dgl(
         batch: dict[str, Any],
         feature_encoder: dict[str, Any],
     ) -> Union[dgl.DGLGraph, list[dgl.DGLGraph], None]:
         if isinstance(batch, LazyBatch):
             graphs = [
-                MolRSmilesEmbedder.smiles_to_dgl(smiles, feature_encoder=feature_encoder)
+                MolRSmilesEmbedder._smiles_to_dgl(smiles, feature_encoder=feature_encoder)
                 for smiles in batch['smiles']
             ]
         elif isinstance(batch, LazyRow) or isinstance(batch, dict[str, Any]):
             graphs = [
-                MolRSmilesEmbedder.smiles_to_dgl(
+                MolRSmilesEmbedder._smiles_to_dgl(
                     batch['smiles'], feature_encoder=feature_encoder
                 )
             ]
@@ -106,7 +109,3 @@ class MolRSmilesEmbedder:
             raise ValueError('Invalid inputs type')
 
         return graphs
-
-    @property
-    def dimension(self) -> int:
-        return self.dim

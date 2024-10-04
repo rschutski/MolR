@@ -23,3 +23,4 @@ demo.db.lock
 graphs_cache.bin
 milvus_demo.db
 .milvus_demo.db.lock
+data/
