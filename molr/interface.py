@@ -4,7 +4,6 @@ from typing import Any, Union
 
 import dgl
 import torch
-from datasets.formatting.formatting import LazyBatch, LazyRow
 from rdkit import Chem
 
 from molr.data_processing import mol_to_dgl
@@ -49,22 +48,58 @@ class MolRSmilesEmbedder:
     def dimension(self) -> int:
         return self.dim
 
-    def __call__(
+    def process_record(
         self,
         data: dict[str, Any],
     ) -> dict[str, Any]:
-        """Transforms SMILES into an embedding"""
-        return self.process_hf_dataset(data)
+        """Transforms data into an embedding.
+           The data should contain a 'smiles' key with a SMILES string
 
-    def process_hf_dataset(
+        Args:
+            data (dict[str, Any]): dictionary containing the SMILES string
+
+        Returns:
+            dict[str, Any]: dictionary containing the SMILES string
+                and the 'vector' key with the embedding
+        """
+        device = next(self.embedder.parameters()).device
+        graph = MolRSmilesEmbedder._smiles_to_dgl(
+            data['smiles'], feature_encoder=self.feature_encoder
+        )
+        with torch.no_grad():
+            if graph is not None:
+                vector = self.embedder(graph.to(device))
+            else:
+                vector = torch.zeros(self.dim, device=device)
+        data['vector'] = vector
+        return data
+
+    def process_batch(
         self,
         batch: dict[str, Any],
         indices: Union[list[int], None] = None,
         rank: Union[int, None] = None,
     ) -> dict[str, Any]:
-        """Transforms SMILES into an embedding"""
+        """Transforms SMILES into an embedding
+
+        Args:
+            batch (dict[str, Any]): record batch, dictionary containing the
+                SMILES strings array in 'smiles' key
+            indices (Union[list[int], None], optional): indices for records in batch.
+                Defaults to None.
+            rank (Union[int, None], optional): MPI-style rank of the process. Can be used
+                for multi-gpu parallelization. Defaults to None.
+
+        Returns:
+            dict[str, Any]: record batch containing the 'vector' key with the embeddings
+        """
         device = next(self.embedder.parameters()).device
-        graphs = self._smiles_batch_to_dgl(batch, feature_encoder=self.feature_encoder)
+        graphs = [
+            MolRSmilesEmbedder._smiles_to_dgl(
+                smiles, feature_encoder=self.feature_encoder
+            )
+            for smiles in batch['smiles']
+        ]
         valid_indices = [i for i, graph in enumerate(graphs) if graph is not None]
         graphs_gpu = [graph.to(device) for graph in graphs if graph is not None]
         with torch.no_grad():
@@ -81,6 +116,15 @@ class MolRSmilesEmbedder:
     def _smiles_to_dgl(
         smiles: str, feature_encoder: dict[str, Any]
     ) -> Union[dgl.DGLGraph, None]:
+        """Converts a SMILES string into a DGLGraph
+
+        Args:
+            smiles (str): SMILES string
+            feature_encoder (dict[str, Any]): feature encoder dictionary
+
+        Returns:
+            Union[dgl.DGLGraph, None]: DGLGraph object or None if the SMILES is invalid
+        """
         try:
             mol = Chem.RemoveHs(Chem.MolFromSmiles(smiles))
             graph = mol_to_dgl(mol, feature_encoder)
@@ -88,24 +132,3 @@ class MolRSmilesEmbedder:
             graph = None
             print(f'Error in smiles_to_dgl_rdkit: {e}')
         return graph
-
-    @staticmethod
-    def _smiles_batch_to_dgl(
-        batch: dict[str, Any],
-        feature_encoder: dict[str, Any],
-    ) -> Union[dgl.DGLGraph, list[dgl.DGLGraph], None]:
-        if isinstance(batch, LazyBatch):
-            graphs = [
-                MolRSmilesEmbedder._smiles_to_dgl(smiles, feature_encoder=feature_encoder)
-                for smiles in batch['smiles']
-            ]
-        elif isinstance(batch, LazyRow) or isinstance(batch, dict[str, Any]):
-            graphs = [
-                MolRSmilesEmbedder._smiles_to_dgl(
-                    batch['smiles'], feature_encoder=feature_encoder
-                )
-            ]
-        else:
-            raise ValueError('Invalid inputs type')
-
-        return graphs
