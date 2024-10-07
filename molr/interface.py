@@ -20,11 +20,15 @@ class MolRSmilesEmbedder:
         device: Union[torch.device, None] = None,
     ):
         self.model_path = Path(model_path)
-        self.device = device or torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.device = device or torch.device(
+            'cuda' if torch.cuda.is_available() else 'cpu'
+        )
         self._load_model(self.model_path, self.device)
 
     def _load_model(self, model_path: Union[str, Path], device: torch.device) -> None:
-        self.feature_encoder = pickle.load(model_path.joinpath('feature_enc.pkl').open('rb'))
+        self.feature_encoder = pickle.load(
+            model_path.joinpath('feature_enc.pkl').open('rb')
+        )
         self.hparams = pickle.load(model_path.joinpath('hparams.pkl').open('rb'))
         self.embedder = GNN(
             self.hparams['gnn'], self.hparams['layer'],
@@ -68,7 +72,7 @@ class MolRSmilesEmbedder:
         )
         with torch.no_grad():
             if graph is not None:
-                vector = self.embedder(graph.to(device))
+                vector = self.embedder(graph.to(device)).squeeze(0)  # type: ignore
             else:
                 vector = torch.zeros(self.dim, device=device)
         data['vector'] = vector
@@ -85,13 +89,14 @@ class MolRSmilesEmbedder:
         Args:
             batch (dict[str, Any]): record batch, dictionary containing the
                 SMILES strings array in 'smiles' key
-            indices (Union[list[int], None], optional): indices for records in batch.
-                Defaults to None.
-            rank (Union[int, None], optional): MPI-style rank of the process. Can be used
-                for multi-gpu parallelization. Defaults to None.
+            indices (Union[list[int], None], optional): indices for records
+                in batch. Defaults to None.
+            rank (Union[int, None], optional): MPI-style rank of the process.
+                Can be used for multi-gpu parallelization. Defaults to None.
 
         Returns:
-            dict[str, Any]: record batch containing the 'vector' key with the embeddings
+            dict[str, Any]: record batch containing the 'vector' key with the
+                embeddings
         """
         device = next(self.embedder.parameters()).device
         graphs = [
@@ -123,7 +128,8 @@ class MolRSmilesEmbedder:
             feature_encoder (dict[str, Any]): feature encoder dictionary
 
         Returns:
-            Union[dgl.DGLGraph, None]: DGLGraph object or None if the SMILES is invalid
+            Union[dgl.DGLGraph, None]: DGLGraph object or None if the SMILES
+                is invalid
         """
         try:
             mol = Chem.RemoveHs(Chem.MolFromSmiles(smiles))
