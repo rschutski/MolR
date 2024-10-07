@@ -75,7 +75,7 @@ class MolRSmilesEmbedder:
                 vector = self.embedder(graph.to(device)).squeeze(0)  # type: ignore
             else:
                 vector = torch.zeros(self.dim, device=device)
-        data['vector'] = vector
+        data['vector'] = vector.numpy()
         return data
 
     def process_batch(
