@@ -1,3 +1,4 @@
+import multiprocessing
 import pickle
 from pathlib import Path
 from typing import Any, Union
@@ -8,6 +9,9 @@ from rdkit import Chem
 
 from molr.data_processing import mol_to_dgl
 from molr.model import GNN
+
+
+NUM_PROC = multiprocessing.cpu_count()
 
 
 class MolRSmilesEmbedder:
@@ -55,13 +59,18 @@ class MolRSmilesEmbedder:
     def process_record(
         self,
         data: dict[str, Any],
+        idx: Union[int, None] = None,
     ) -> dict[str, Any]:
         """Transforms data into an embedding.
-           The data should contain a 'smiles' key with a SMILES string
+           The data should contain a 'smiles' key with a SMILES string.
 
         Args:
-            data (dict[str, Any]): dictionary containing the SMILES string
-
+            data (dict[str, Any]): dictionary containing the SMILES string.
+                To obtain records from a pandas DataFrame, use
+                `records = df.to_dict(orient='records')`.
+            idx (Union[int, None], optional): index of the record in the
+                dataset. If not None, a column `idx` will be added to features.
+                Defaults to None.
         Returns:
             dict[str, Any]: dictionary containing the SMILES string
                 and the 'vector' key with the embedding
@@ -72,10 +81,12 @@ class MolRSmilesEmbedder:
         )
         with torch.no_grad():
             if graph is not None:
-                vector = self.embedder(graph.to(device)).squeeze(0)  # type: ignore
+                vector = self.embedder(graph.to(device)).squeeze(0).tolist()  # type: ignore
             else:
-                vector = torch.zeros(self.dim, device=device)
-        data['vector'] = vector.numpy()
+                vector = torch.zeros(self.dim, device=device).tolist()
+        data['vector'] = vector
+        if idx is not None:
+            data['id'] = idx
         return data
 
     def process_batch(
@@ -88,9 +99,11 @@ class MolRSmilesEmbedder:
 
         Args:
             batch (dict[str, Any]): record batch, dictionary containing the
-                SMILES strings array in 'smiles' key
+                SMILES strings array in 'smiles' key. To obtain batch from
+                a pandas DataFrame, use `batch = df.to_dict(orient='list')`.
             indices (Union[list[int], None], optional): indices for records
-                in batch. Defaults to None.
+                in batch. If not None, a column `idx` will be added to features.
+                Defaults to None.
             rank (Union[int, None], optional): MPI-style rank of the process.
                 Can be used for multi-gpu parallelization. Defaults to None.
 
@@ -112,9 +125,11 @@ class MolRSmilesEmbedder:
             if len(valid_indices) < len(graphs):
                 vectors_full = torch.zeros((len(graphs), self.dim), device=device)
                 vectors_full[valid_indices] = vectors
-                batch['vector'] = vectors_full
+                batch['vector'] = vectors_full.tolist()
             else:
-                batch['vector'] = vectors
+                batch['vector'] = vectors.tolist()
+        if indices is not None:
+            batch['idx'] = indices
         return batch
 
     @staticmethod
