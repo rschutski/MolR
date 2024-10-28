@@ -6,7 +6,9 @@ authors = ["Hongwei Wang et al."]
 packages = [
     { include = "molr", from = "src" }
 ]
-include = ["saved/*"]
+include = [
+    { path = "src/molr/weights", format = ["sdist", "wheel"] }
+]
 
 [[tool.poetry.source]]
 name = "pytorch-gpu"
@@ -34,7 +36,6 @@ dgl = [
    {path = "thirdpartry/dgl/dist/dgl-2.5-cp39-cp39-linux_x86_64.whl", python = "3.9"},
    {version = "*", python = ">3.9"},    
 ]
-
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.6.1"
