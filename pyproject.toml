@@ -4,9 +4,9 @@ version = "0.1.0"
 description = "Implementation of the MolR embedding model"
 authors = ["Hongwei Wang et al."]
 packages = [
-    { include = "src" }
+    { include = "molr", from = "src" }
 ]
-# include = ["saved/*"]
+include = ["saved/*"]
 
 [[tool.poetry.source]]
 name = "pytorch-gpu"
@@ -30,15 +30,11 @@ datasets = "<3.0.0" # for compatibility with molpredictors
 pyarrow = "14.*"  # for compatibility with darwin_molecules
 dill = "0.3.6" # for compatibility with darwin_molecules
 rdkit-pypi = "*"
-#dgl = [
-#    {path = "thirdparty/dgl/dist/dgl-2.5-cp39-cp39-linux_x86_64.whl", python = "3.9"},
-#    {version = "*", python = ">3.9"},    
-#]
+dgl = [
+   {path = "thirdpartry/dgl/dist/dgl-2.5-cp39-cp39-linux_x86_64.whl", python = "3.9"},
+   {version = "*", python = ">3.9"},    
+]
 
-[tool.poetry.group.sage.dependencies]
-sagemaker-inference = "*"
-# sagemaker-training = "*"
-jupyterlab = "*"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.6.1"
@@ -120,18 +116,6 @@ ignored-classes = [
 ]
 ignored-argument-names = "args"
 
-[tool.bandit]
-exclude_dirs = ["migrations", ".venv"]
-skips = ["B101"]
-
-[tool.pytest.ini_options]
-markers = [
-    "webtest: mark a test as a webtest."
-]
-required_plugins = [
-    "pytest-asyncio>=0.21.1",
-    # "pytest-cov>=4.1.0"
-]
 addopts = [
   "--strict-config",
   "--strict-markers",
