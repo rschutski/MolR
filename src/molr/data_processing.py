@@ -1,10 +1,11 @@
 import os
-import dgl
-import torch
-import pickle
-import pysmiles
 from collections import defaultdict
+
+import dgl
 import networkx as nx
+import pysmiles
+import torch
+import yaml
 
 attribute_names = ['element', 'charge', 'aromatic', 'hcount']
 
@@ -195,10 +196,10 @@ def preprocess(dataset):
     feature_encoder = get_feature_encoder(all_values)
 
     # save feature encoder to disk
-    path = '../data/' + dataset + '/cache/feature_encoder.pkl'
+    path = '../data/' + dataset + '/cache/feature_encoder.yml'
     print('saving feature encoder to %s' % path)
     with open(path, 'wb') as f:
-        pickle.dump(feature_encoder, f)
+        yaml.dump(feature_encoder, f)
 
     return feature_encoder, train_graphs, valid_graphs, test_graphs
 
@@ -206,10 +207,10 @@ def preprocess(dataset):
 def load_data(args):
     # if datasets are already cached, skip preprocessing
     if os.path.exists('../data/' + args.dataset + '/cache/'):
-        path = '../data/' + args.dataset + '/cache/feature_encoder.pkl'
+        path = '../data/' + args.dataset + '/cache/feature_encoder.yml'
         print('cache found\nloading feature encoder from %s' % path)
         with open(path, 'rb') as f:
-            feature_encoder = pickle.load(f)
+            feature_encoder = yaml.safe_load(f)
         train_dataset = SmilesDataset(args, 'train')
         valid_dataset = SmilesDataset(args, 'valid')
         test_dataset = SmilesDataset(args, 'test')

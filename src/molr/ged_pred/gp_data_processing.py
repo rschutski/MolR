@@ -1,11 +1,12 @@
-import os
-import random
-import dgl
-import torch
-import pickle
-import pysmiles
 import itertools
 import multiprocessing as mp
+import os
+import random
+
+import dgl
+import pysmiles
+import torch
+import yaml
 from data_processing import networkx_to_dgl
 from networkx.algorithms.similarity import graph_edit_distance
 
@@ -40,9 +41,13 @@ class GEDPredDataset(dgl.data.DGLDataset):
         self.to_gpu()
 
     def process(self):
-        print('loading feature encoder from ../saved/' + self.args.pretrained_model + '/feature_enc.pkl')
-        with open('../saved/' + self.args.pretrained_model + '/feature_enc.pkl', 'rb') as f:
-            feature_encoder = pickle.load(f)
+        print(
+            'loading feature encoder from ../saved/'
+            + self.args.pretrained_model
+            + '/feature_enc.yml'
+        )
+        with open('../saved/' + self.args.pretrained_model + '/feature_enc.yml', 'rb') as f:
+            feature_encoder = yaml.safe_load(f)
 
         molecule_list = self.get_molecule_list()
         samples = self.sample(molecule_list)

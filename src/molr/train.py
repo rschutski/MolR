@@ -1,11 +1,12 @@
 import os
-import torch
-import pickle
+from copy import deepcopy
+
 import data_processing
 import numpy as np
-from model import GNN
-from copy import deepcopy
+import torch
+import yaml
 from dgl.dataloading import GraphDataLoader
+from model import GNN
 
 # torch.set_printoptions(profile="full", linewidth=100000, sci_mode=False)
 
@@ -73,11 +74,11 @@ def train(args, data):
 
         print('saving the model to directory: %s' % directory)
         torch.save(best_model_params, directory + '/model.pt')
-        with open(directory + '/hparams.pkl', 'wb') as f:
+        with open(directory + '/hparams.yml', 'wb') as f:
             hp_dict = {'gnn': args.gnn, 'layer': args.layer, 'feature_len': feature_len, 'dim': args.dim}
-            pickle.dump(hp_dict, f)
-        with open(directory + '/feature_enc.pkl', 'wb') as f:
-            pickle.dump(feature_encoder, f)
+            yaml.dump(hp_dict, f)
+        with open(directory + '/feature_enc.yml', 'wb') as f:
+            yaml.dump(feature_encoder, f)
 
 
 def calculate_loss(reactant_embeddings, product_embeddings, args):

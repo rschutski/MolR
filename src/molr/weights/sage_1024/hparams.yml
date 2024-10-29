@@ -1,0 +1,4 @@
+dim: 1024
+feature_len: 55
+gnn: sage
+layer: 2

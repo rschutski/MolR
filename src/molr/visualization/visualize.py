@@ -1,19 +1,21 @@
-import os
-import torch
-import pickle
-import pysmiles
-import matplotlib
-import numpy as np
 import multiprocessing as mp
+import os
+import pickle
+
+import matplotlib
 import matplotlib.pyplot as plt
-from model import GNN
-from openbabel import pybel
-from featurizer import MolEFeaturizer
+import numpy as np
+import pysmiles
+import torch
+import yaml
 from dgl.dataloading import GraphDataLoader
-from sklearn.manifold import TSNE
-from sklearn.decomposition import PCA
+from featurizer import MolEFeaturizer
+from model import GNN
 from networkx.algorithms.similarity import graph_edit_distance
+from openbabel import pybel
 from property_pred.pp_data_processing import PropertyPredDataset
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
 
 matplotlib.rcParams['pdf.fonttype'] = 42
 matplotlib.rcParams['ps.fonttype'] = 42
@@ -150,9 +152,9 @@ def draw(args):
     else:
         data = PropertyPredDataset(args)
         path = '../saved/' + args.pretrained_model + '/'
-        print('loading hyperparameters of pretrained model from ' + path + 'hparams.pkl')
-        with open(path + 'hparams.pkl', 'rb') as f:
-            hparams = pickle.load(f)
+        print('loading hyperparameters of pretrained model from ' + path + 'hparams.yml')
+        with open(path + 'hparams.yml', 'rb') as f:
+            hparams = yaml.safe_load(f)
 
         print('loading pretrained model from ' + path + 'model.pt')
         mole = GNN(hparams['gnn'], hparams['layer'], hparams['feature_len'], hparams['dim'])

@@ -1,10 +1,9 @@
 import os
-import pickle
 
 import dgl
 import pysmiles
 import torch
-
+import yaml
 from data_processing import networkx_to_dgl
 
 
@@ -32,9 +31,13 @@ class PropertyPredDataset(dgl.data.DGLDataset):
         self.to_gpu()
 
     def process(self):
-        print('loading feature encoder from ../saved/' + self.args.pretrained_model + '/feature_enc.pkl')
-        with open('../saved/' + self.args.pretrained_model + '/feature_enc.pkl', 'rb') as f:
-            feature_encoder = pickle.load(f)
+        print(
+            'loading feature encoder from ../saved/'
+            + self.args.pretrained_model
+            + '/feature_enc.yml'
+        )
+        with open('../saved/' + self.args.pretrained_model + '/feature_enc.yml', 'rb') as f:
+            feature_encoder = yaml.safe_load(f)
         print('processing ' + self.args.dataset + ' dataset')
         with open(self.path + '.csv') as f:
             for idx, line in enumerate(f.readlines()):

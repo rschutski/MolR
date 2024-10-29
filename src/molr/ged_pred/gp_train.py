@@ -1,16 +1,16 @@
 import torch
-import pickle
-from model import GNN
+import yaml
 from dgl.dataloading import GraphDataLoader
-from sklearn.svm import SVR
+from model import GNN
 from sklearn.metrics import mean_absolute_error, mean_squared_error
+from sklearn.svm import SVR
 
 
 def train(args, data):
     path = '../saved/' + args.pretrained_model + '/'
-    print('loading hyperparameters of pretrained model from ' + path + 'hparams.pkl')
-    with open(path + 'hparams.pkl', 'rb') as f:
-        hparams = pickle.load(f)
+    print('loading hyperparameters of pretrained model from ' + path + 'hparams.yml')
+    with open(path + 'hparams.yml', 'rb') as f:
+        hparams = yaml.safe_load(f)
 
     print('loading pretrained model from ' + path + 'model.pt')
     mole = GNN(hparams['gnn'], hparams['layer'], hparams['feature_len'], hparams['dim'])

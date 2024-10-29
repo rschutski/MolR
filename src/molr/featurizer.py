@@ -1,11 +1,11 @@
-import pickle
 import dgl
-import torch
-import pysmiles
 import numpy as np
-from model import GNN
-from dgl.dataloading import GraphDataLoader
+import pysmiles
+import torch
+import yaml
 from data_processing import networkx_to_dgl
+from dgl.dataloading import GraphDataLoader
+from model import GNN
 
 
 class GraphDataset(dgl.data.DGLDataset):
@@ -18,8 +18,8 @@ class GraphDataset(dgl.data.DGLDataset):
         super().__init__(name='graph_dataset')
 
     def process(self):
-        with open(self.path + '/feature_enc.pkl', 'rb') as f:
-            feature_encoder = pickle.load(f)
+        with open(self.path + '/feature_enc.yml', 'rb') as f:
+            feature_encoder = yaml.safe_load(f)
         for i, smiles in enumerate(self.smiles_list):
             try:
                 raw_graph = pysmiles.read_smiles(smiles, zero_order_bonds=False)
@@ -40,12 +40,12 @@ class GraphDataset(dgl.data.DGLDataset):
         return len(self.graphs)
 
 
-class MolEFeaturizer(object):
+class MolEFeaturizer:
     def __init__(self, path_to_model, gpu=0):
         self.path_to_model = path_to_model
         self.gpu = gpu
-        with open(path_to_model + '/hparams.pkl', 'rb') as f:
-            hparams = pickle.load(f)
+        with open(path_to_model + '/hparams.yml', 'rb') as f:
+            hparams = yaml.safe_load(f)
         self.mole = GNN(hparams['gnn'], hparams['layer'], hparams['feature_len'], hparams['dim'])
         self.dim = hparams['dim']
         if torch.cuda.is_available() and gpu is not None:

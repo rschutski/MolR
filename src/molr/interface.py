@@ -1,13 +1,12 @@
-import pickle
 from pathlib import Path
 from typing import Any, Union
 
 import dgl
 import torch
-from rdkit import Chem
-
+import yaml
 from data_processing import mol_to_dgl
 from model import GNN
+from rdkit import Chem
 
 
 class MolRSmilesEmbedder:
@@ -24,8 +23,8 @@ class MolRSmilesEmbedder:
         self.load_model(self.model_path, self.device)
 
     def load_model(self, model_path: Union[str, Path], device: torch.device) -> None:
-        self.feature_encoder = pickle.load(model_path.joinpath('feature_enc.pkl').open('rb'))
-        self.hparams = pickle.load(model_path.joinpath('hparams.pkl').open('rb'))
+        self.feature_encoder = yaml.safe_load(model_path.joinpath('feature_enc.yml').open('rb'))
+        self.hparams = yaml.safe_load(model_path.joinpath('hparams.yml').open('rb'))
         self.embedder = GNN(
             self.hparams['gnn'], self.hparams['layer'],
             self.hparams['feature_len'], self.hparams['dim'])
