@@ -21,7 +21,7 @@ tag:
         - git fetch origin master:refs/remotes/origin/master
         - $SCRIPTS_DIR/bump-version
     only:
-        - master
+        - main
         - /^release-.*$/
     tags:
         - gitlab-runner-global-k8s
@@ -59,7 +59,7 @@ submit_artifacts:
     when: manual
     allow_failure: true
     only:
-        - master
+        - main
         - /^release-.*$/
     script:
         - ls -l ${PWD}/artifacts
