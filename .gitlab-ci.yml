@@ -1,0 +1,68 @@
+image: 679383719989.dkr.ecr.ap-northeast-2.amazonaws.com/gitlab/docker:24.0.7-alpine3.18-full
+
+services:
+  - name: 679383719989.dkr.ecr.ap-northeast-2.amazonaws.com/gitlab/docker:24.0.7-alpine3.18-full-dind
+    alias: docker
+
+stages:
+    - tag
+    - build
+    - submit_artifacts
+
+tag:
+    stage: tag
+    before_script:
+        - export SCRIPTS_DIR=$(mktemp -d)
+        - git clone -q --depth 1 "$SCRIPTS_REPO" "$SCRIPTS_DIR"
+    variables:
+        SCRIPTS_REPO: https://$SCRIPTS_USER:$SCRIPTS_TOKEN@gitlab.com/insilicoteam/infra/ci-scripts
+    script:
+        - git fetch origin --prune --prune-tags
+        - git fetch origin master:refs/remotes/origin/master
+        - $SCRIPTS_DIR/bump-version
+    only:
+        - master
+        - /^release-.*$/
+    tags:
+        - gitlab-runner-global-k8s
+
+build:
+    stage: build
+    variables:
+        DOCKER_HOST: tcp://docker:2375/
+        DOCKER_TLS_CERTDIR: ""
+        DOCKER_BUILDKIT: 1
+    script:
+        - echo "Wait for Docker daemon at tcp://docker:2375"
+        - sleep 20
+        - mkdir -p ${PWD}/all_wheels ${PWD}/artifacts
+        - pip wheel . -w ${PWD}/all_wheels
+        - cp ${PWD}/all_wheels/molr-*.whl ${PWD}/all_wheels/dgl-*.whl ${PWD}/artifacts
+        - echo "ARTIFACT_JOB_ID=$CI_JOB_ID" >> build.env
+    only:
+        - branches
+    artifacts:
+        paths:
+            - ${PWD}/artifacts
+        reports:
+            dotenv: build.env
+    tags:
+        - gitlab-runner-global-k8s
+
+
+submit_artifacts:
+    stage: submit_artifacts
+    dependencies:
+        - build
+    tags:
+        - gitlab-runner-global-k8s
+    when: manual
+    allow_failure: true
+    only:
+        - master
+        - /^release-.*$/
+    script:
+        - ls -l ${PWD}/artifacts
+        - pip install --upgrade pip twine
+        - aws codeartifact login --tool twine --domain chemistry42 --domain-owner 679383719989 --region eu-central-1 --repository artifacts
+        - twine upload --repository codeartifact ${PWD}/artifacts/*.whl

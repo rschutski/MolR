@@ -21,7 +21,7 @@ build-backend = "poetry.core.masonry.api"
 
 [tool.poetry.dependencies]
 python = ">=3.9,<4.0"
-torch = "2.2.2"
+torch = "2.2.*"
 matplotlib = "*"
 scikit-learn = "*"
 pysmiles = "*"
@@ -33,8 +33,8 @@ pyarrow = "14.*"  # for compatibility with darwin_molecules
 dill = "0.3.6" # for compatibility with darwin_molecules
 rdkit-pypi = "*"
 dgl = [
-   {path = "thirdpartry/dgl/dist/dgl-2.5-cp39-cp39-linux_x86_64.whl", python = "3.9"},
-   {version = "*", python = ">3.9"},    
+   {url = "https://data.dgl.ai/wheels/torch-2.2/cu118/dgl-2.4.0%2Bcu118-cp39-cp39-manylinux1_x86_64.whl", python = "<=3.10"},
+   {version = "*", python = ">3.10"},    
 ]
 
 [tool.poetry.group.dev.dependencies]
